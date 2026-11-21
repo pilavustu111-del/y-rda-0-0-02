@@ -1,0 +1,44 @@
+name: Android Bozkurt APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Projeyi indir
+        uses: actions/checkout@v4
+
+      - name: Java 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle 8.7 kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: APK derle
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: APK dosyasını hazırla
+        run: |
+          mkdir -p output
+          cp app/build/outputs/apk/debug/*.apk output/Android-Bozkurt.apk
+
+      - name: APK dosyasını yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-Bozkurt
+          path: output/Android-Bozkurt.apk
+          if-no-files-found: error
